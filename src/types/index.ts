@@ -19,3 +19,28 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
+
+export interface TokenBalance {
+  contractAddress: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logo: string | null;
+  balance: string;
+}
+
+export interface TokenBalancesData {
+  address: string;
+  tokens: TokenBalance[];
+  count: number;
+  fetchedAt: string;
+}
+
+export interface PortfolioData {
+  address: string;
+  ethBalance: string;
+  ethUnit: "ETH";
+  tokens: TokenBalance[];
+  tokenCount: number;
+  fetchedAt: string;
+}
