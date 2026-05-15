@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import ethereumRoutes from "./routes/ethereum.routes";
+import contractRoutes from "./routes/contract.routes";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
@@ -15,6 +16,7 @@ app.get("/health", (_req, res) =>
 
 // API routes
 app.use("/api/ethereum", ethereumRoutes);
+app.use("/api/contracts", contractRoutes);
 
 // 404 handler
 app.use((_req, res) =>

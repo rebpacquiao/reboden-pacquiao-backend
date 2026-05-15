@@ -44,3 +44,22 @@ export interface PortfolioData {
   tokenCount: number;
   fetchedAt: string;
 }
+
+export interface OwnedToken {
+  tokenId: string;
+  tokenURI: string;
+  owner: string;
+}
+
+export interface ContractInfo {
+  address: string;
+  name: string;
+  symbol: string;
+  totalSupply: string;
+}
+
+export interface ContractData {
+  info: ContractInfo;
+  ownedTokens: OwnedToken[];
+  fetchedAt: string;
+}
