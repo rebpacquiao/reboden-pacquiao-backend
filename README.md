@@ -34,40 +34,6 @@ A **Node.js + Express + TypeScript** REST API that returns real-time Ethereum bl
 
 ---
 
-## Project Structure
-
-```
-be/
-├── api/
-│   └── index.ts              # Vercel serverless entry point
-├── prisma/
-│   └── schema.prisma         # MongoDB schema (AccountBalance model)
-├── src/
-│   ├── app.ts                # Express app setup, middleware, routes
-│   ├── server.ts             # Local dev server (app.listen)
-│   ├── controllers/
-│   │   └── ethereum.controller.ts   # Request/response handlers
-│   ├── lib/
-│   │   ├── prisma.ts         # PrismaClient singleton (Vercel-safe globalThis pattern)
-│   │   └── redis.ts          # ioredis client with lazyConnect + silent fallback
-│   ├── middleware/
-│   │   ├── errorHandler.ts   # Global Express error handler
-│   │   └── validate.ts       # Zod middleware for Ethereum address format
-│   ├── routes/
-│   │   └── ethereum.routes.ts       # Route definitions
-│   ├── services/
-│   │   ├── ethereum.service.ts      # Core business logic + Alchemy RPC calls
-│   │   └── cache.service.ts         # Redis get/set with TTL constants
-│   └── types/
-│       └── index.ts          # Shared TypeScript interfaces
-├── .env.development          # Local environment variables (git-ignored)
-├── .env.example              # Template — copy to .env.development
-├── vercel.json               # Vercel routing config
-└── tsconfig.json
-```
-
----
-
 ## API Endpoints
 
 ### Health Check
@@ -192,44 +158,6 @@ All errors follow the same structure:
 | Balance      | _(not cached)_ | —          | Per-address; always fetched fresh          |
 
 Redis is **optional** — if unavailable, the API falls back gracefully with no caching (all requests hit Alchemy directly).
-
----
-
-## Database Schema
-
-```prisma
-model AccountBalance {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  address     String
-  balance     String
-  blockNumber Int
-  fetchedAt   DateTime @default(now())
-
-  @@index([address])
-}
-```
-
----
-
-## Environment Variables
-
-Copy `.env.example` to `.env.development` and fill in your values:
-
-```env
-PORT=4000
-ALCHEMY_URL=https://eth-mainnet.g.alchemy.com/v2/
-ALCHEMY_API_KEY=your_alchemy_api_key_here
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/crypto?retryWrites=true&w=majority
-REDIS_URL=redis://localhost:6379
-```
-
-| Variable          | Required | Description                                        |
-| ----------------- | -------- | -------------------------------------------------- |
-| `ALCHEMY_URL`     | Yes      | Alchemy base URL                                   |
-| `ALCHEMY_API_KEY` | Yes      | Alchemy project API key                            |
-| `MONGODB_URI`     | Yes      | MongoDB Atlas connection string                    |
-| `REDIS_URL`       | No       | Redis connection URL (caching disabled if omitted) |
-| `PORT`            | No       | Server port (default: `4000`)                      |
 
 ---
 
