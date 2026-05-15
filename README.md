@@ -188,7 +188,7 @@ Prisma client is auto-generated during Vercel's build step via the `postinstall`
 The `CryptoWalletNFT` ERC-721 contract is deployed to Sepolia at:
 
 ```
-0x81E023EE4aB728BA0782A0aD8290258021Ad0A71
+00000000000000000000000000000000000
 ```
 
 Built with **OpenZeppelin v5** (ERC721 + ERC721Enumerable + ERC721URIStorage) and compiled with **Hardhat 2.22.0** (Solidity 0.8.28, evmVersion: cancun — required for OZ v5's `mcopy` opcode).
