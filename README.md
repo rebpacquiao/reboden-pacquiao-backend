@@ -6,31 +6,31 @@ A **Node.js + Express + TypeScript** REST API that returns real-time Ethereum bl
 
 ## Requirements Coverage
 
-| Requirement | Status | Implementation |
-|---|---|---|
-| REST API endpoint accepting an Ethereum address | ✅ | `GET /api/ethereum/account/:address` |
-| Current gas price | ✅ | Alchemy `eth_gasPrice` JSON-RPC |
-| Current block number | ✅ | Alchemy `eth_blockNumber` JSON-RPC |
-| Balance of the given address | ✅ | Alchemy `eth_getBalance` JSON-RPC |
-| Return data in JSON format | ✅ | Structured `ApiResponse<T>` wrapper |
-| Properly structured for future extensibility | ✅ | Layered architecture (routes → controller → service → lib) |
-| **Bonus:** Redis caching for gas price & block number | ✅ | `ioredis` — 15s TTL for gas, 12s TTL for block number |
-| **Bonus:** MongoDB database to store account balances | ✅ | MongoDB Atlas via Prisma ORM |
+| Requirement                                           | Status | Implementation                                             |
+| ----------------------------------------------------- | ------ | ---------------------------------------------------------- |
+| REST API endpoint accepting an Ethereum address       | ✅     | `GET /api/ethereum/account/:address`                       |
+| Current gas price                                     | ✅     | Alchemy `eth_gasPrice` JSON-RPC                            |
+| Current block number                                  | ✅     | Alchemy `eth_blockNumber` JSON-RPC                         |
+| Balance of the given address                          | ✅     | Alchemy `eth_getBalance` JSON-RPC                          |
+| Return data in JSON format                            | ✅     | Structured `ApiResponse<T>` wrapper                        |
+| Properly structured for future extensibility          | ✅     | Layered architecture (routes → controller → service → lib) |
+| **Bonus:** Redis caching for gas price & block number | ✅     | `ioredis` — 15s TTL for gas, 12s TTL for block number      |
+| **Bonus:** MongoDB database to store account balances | ✅     | MongoDB Atlas via Prisma ORM                               |
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js 20 |
-| Framework | Express 4 |
-| Language | TypeScript 5 |
-| Blockchain API | Alchemy JSON-RPC (Ethereum Mainnet) |
-| Database | MongoDB Atlas via Prisma 5 |
-| Caching | Redis via ioredis (graceful fallback if unavailable) |
-| Validation | Zod |
-| Deployment | Vercel (serverless) |
+| Layer          | Technology                                           |
+| -------------- | ---------------------------------------------------- |
+| Runtime        | Node.js 20                                           |
+| Framework      | Express 4                                            |
+| Language       | TypeScript 5                                         |
+| Blockchain API | Alchemy JSON-RPC (Ethereum Mainnet)                  |
+| Database       | MongoDB Atlas via Prisma 5                           |
+| Caching        | Redis via ioredis (graceful fallback if unavailable) |
+| Validation     | Zod                                                  |
+| Deployment     | Vercel (serverless)                                  |
 
 ---
 
@@ -71,10 +71,13 @@ be/
 ## API Endpoints
 
 ### Health Check
+
 ```
 GET /health
 ```
+
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -85,6 +88,7 @@ GET /health
 ---
 
 ### Get Account Data
+
 ```
 GET /api/ethereum/account/:address
 ```
@@ -93,16 +97,18 @@ Returns the current gas price, block number, and ETH balance for the given Ether
 
 **Parameters:**
 
-| Name | Type | Description |
-|---|---|---|
+| Name      | Type     | Description                                         |
+| --------- | -------- | --------------------------------------------------- |
 | `address` | `string` | A valid Ethereum address (`0x` + 40 hex characters) |
 
 **Example Request:**
+
 ```
 GET /api/ethereum/account/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 ```
 
 **Example Response:**
+
 ```json
 {
   "success": true,
@@ -127,6 +133,7 @@ GET /api/ethereum/account/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 ---
 
 ### Get Balance History
+
 ```
 GET /api/ethereum/account/:address/history
 ```
@@ -134,11 +141,13 @@ GET /api/ethereum/account/:address/history
 Returns the last 20 balance snapshots stored in MongoDB for the given address.
 
 **Example Request:**
+
 ```
 GET /api/ethereum/account/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/history
 ```
 
 **Example Response:**
+
 ```json
 {
   "success": true,
@@ -158,6 +167,7 @@ GET /api/ethereum/account/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/history
 ### Error Response Format
 
 All errors follow the same structure:
+
 ```json
 {
   "success": false,
@@ -165,21 +175,21 @@ All errors follow the same structure:
 }
 ```
 
-| HTTP Status | Cause |
-|---|---|
-| `400` | Invalid Ethereum address format |
-| `404` | Route not found |
-| `500` | Alchemy API failure or internal server error |
+| HTTP Status | Cause                                        |
+| ----------- | -------------------------------------------- |
+| `400`       | Invalid Ethereum address format              |
+| `404`       | Route not found                              |
+| `500`       | Alchemy API failure or internal server error |
 
 ---
 
 ## Caching Strategy
 
-| Data | Cache Key | TTL | Reason |
-|---|---|---|---|
-| Gas price | `gas_price` | 15 seconds | Changes frequently with network congestion |
-| Block number | `block_number` | 12 seconds | ~Ethereum average block time |
-| Balance | _(not cached)_ | — | Per-address; always fetched fresh |
+| Data         | Cache Key      | TTL        | Reason                                     |
+| ------------ | -------------- | ---------- | ------------------------------------------ |
+| Gas price    | `gas_price`    | 15 seconds | Changes frequently with network congestion |
+| Block number | `block_number` | 12 seconds | ~Ethereum average block time               |
+| Balance      | _(not cached)_ | —          | Per-address; always fetched fresh          |
 
 Redis is **optional** — if unavailable, the API falls back gracefully with no caching (all requests hit Alchemy directly).
 
@@ -213,13 +223,13 @@ MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/crypto?retryWrit
 REDIS_URL=redis://localhost:6379
 ```
 
-| Variable | Required | Description |
-|---|---|---|
-| `ALCHEMY_URL` | Yes | Alchemy base URL |
-| `ALCHEMY_API_KEY` | Yes | Alchemy project API key |
-| `MONGODB_URI` | Yes | MongoDB Atlas connection string |
-| `REDIS_URL` | No | Redis connection URL (caching disabled if omitted) |
-| `PORT` | No | Server port (default: `4000`) |
+| Variable          | Required | Description                                        |
+| ----------------- | -------- | -------------------------------------------------- |
+| `ALCHEMY_URL`     | Yes      | Alchemy base URL                                   |
+| `ALCHEMY_API_KEY` | Yes      | Alchemy project API key                            |
+| `MONGODB_URI`     | Yes      | MongoDB Atlas connection string                    |
+| `REDIS_URL`       | No       | Redis connection URL (caching disabled if omitted) |
+| `PORT`            | No       | Server port (default: `4000`)                      |
 
 ---
 
@@ -262,8 +272,8 @@ Prisma client is auto-generated during Vercel's build step via the `postinstall`
 
 **Base URL:** `https://crypto.rctravelrentals.com`
 
-| Endpoint | Description |
-|---|---|
-| `GET /health` | Health check |
-| `GET /api/ethereum/account/:address` | Account data |
+| Endpoint                                     | Description     |
+| -------------------------------------------- | --------------- |
+| `GET /health`                                | Health check    |
+| `GET /api/ethereum/account/:address`         | Account data    |
 | `GET /api/ethereum/account/:address/history` | Balance history |
