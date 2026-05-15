@@ -1,5 +1,8 @@
 node_modules/
 dist/
+artifacts/
+cache/
+typechain-types/
 .env
 .env.local
 .env.development
