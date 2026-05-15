@@ -63,3 +63,12 @@ export interface ContractData {
   ownedTokens: OwnedToken[];
   fetchedAt: string;
 }
+
+export interface MintRecord {
+  id: string;
+  tokenId: string;
+  tokenURI: string;
+  owner: string;
+  txHash: string;
+  mintedAt: string;
+}

@@ -17,3 +17,14 @@ model AccountBalance {
 
   @@index([address])
 }
+
+model MintedNFT {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tokenId   String
+  tokenURI  String
+  owner     String
+  txHash    String   @unique
+  mintedAt  DateTime @default(now())
+
+  @@index([owner])
+}
