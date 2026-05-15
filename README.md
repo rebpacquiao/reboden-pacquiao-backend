@@ -1,6 +1,8 @@
-# Crypto Backend API
+# CryptoWallet Backend API
 
-A **Node.js + Express + TypeScript** REST API that returns real-time Ethereum blockchain data for a given wallet address. Built as part of the **Tier 2: Backend Development** challenge.
+A **Node.js + Express + TypeScript** REST API that powers the CryptoWallet Dashboard. It exposes real-time Ethereum blockchain data for any wallet address, persists balance history to MongoDB Atlas, caches frequently-requested data in Redis, and deploys the **CryptoWalletNFT** ERC-721 smart contract to the Sepolia testnet.
+
+Built as part of the **Tier 2: Backend Development** challenge.
 
 ---
 
@@ -16,21 +18,6 @@ A **Node.js + Express + TypeScript** REST API that returns real-time Ethereum bl
 | Properly structured for future extensibility          | ✅     | Layered architecture (routes → controller → service → lib) |
 | **Bonus:** Redis caching for gas price & block number | ✅     | `ioredis` — 15s TTL for gas, 12s TTL for block number      |
 | **Bonus:** MongoDB database to store account balances | ✅     | MongoDB Atlas via Prisma ORM                               |
-
----
-
-## Tech Stack
-
-| Layer          | Technology                                           |
-| -------------- | ---------------------------------------------------- |
-| Runtime        | Node.js 20                                           |
-| Framework      | Express 4                                            |
-| Language       | TypeScript 5                                         |
-| Blockchain API | Alchemy JSON-RPC (Ethereum Mainnet)                  |
-| Database       | MongoDB Atlas via Prisma 5                           |
-| Caching        | Redis via ioredis (graceful fallback if unavailable) |
-| Validation     | Zod                                                  |
-| Deployment     | Vercel (serverless)                                  |
 
 ---
 
@@ -193,6 +180,81 @@ The app is deployed as a **Vercel Serverless Function** via `api/index.ts`.
    - `REDIS_URL` _(optional)_
 
 Prisma client is auto-generated during Vercel's build step via the `postinstall` script.
+
+---
+
+## Smart Contract (Sepolia Testnet)
+
+The `CryptoWalletNFT` ERC-721 contract is deployed to Sepolia at:
+
+```
+0x81E023EE4aB728BA0782A0aD8290258021Ad0A71
+```
+
+Built with **OpenZeppelin v5** (ERC721 + ERC721Enumerable + ERC721URIStorage) and compiled with **Hardhat 2.22.0** (Solidity 0.8.28, evmVersion: cancun — required for OZ v5's `mcopy` opcode).
+
+### Deploy the contract yourself
+
+```bash
+# Compile
+npx hardhat compile
+
+# Deploy to Sepolia (requires DEPLOYER_PRIVATE_KEY + Alchemy Sepolia URL in .env.development)
+npx hardhat run scripts/deploy.ts --network sepolia
+```
+
+---
+
+## Docker Setup
+
+This service is part of a multi-container stack defined at the **workspace root** (`../docker-compose.yml`). Redis is containerised; MongoDB stays on Atlas (external cloud).
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- Workspace root `.env` file filled in (see `.env.example`)
+
+### Run with Docker Compose
+
+```bash
+# From the workspace root (d:\onlineTest)
+docker compose up --build
+
+# Or detached
+docker compose up --build -d
+```
+
+### Run only the backend container
+
+```bash
+# From d:\onlineTest\be
+docker build -t crypto-backend .
+docker run -p 4000:4000 --env-file .env.development crypto-backend
+```
+
+---
+
+## Key Architectural Decisions
+
+| Decision                                                       | Rationale                                                                                            |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Layered architecture** (routes → controller → service → lib) | Separates concerns; each layer is independently testable                                             |
+| **Redis optional / graceful fallback**                         | API stays functional even without Redis; avoids hard dependency on cache availability                |
+| **MongoDB Atlas (not containerised)**                          | Atlas manages backups, scaling, and connectivity; no ops overhead for a dev/demo project             |
+| **Prisma over raw Mongoose**                                   | Type-safe schema, auto-generated client, built-in migration support                                  |
+| **Vercel serverless adapter**                                  | Zero-config deployment; `api/index.ts` wraps the Express app for serverless execution                |
+| **Hardhat v2 (not v3)**                                        | Hardhat v3 requires ESM-only config; the existing TypeScript + CommonJS toolchain is incompatible    |
+| **evmVersion: "cancun"**                                       | OpenZeppelin v5 uses the `mcopy` opcode (EIP-5656), which is only available from the Cancun hardfork |
+
+---
+
+## Known Issues / Limitations
+
+- **No authentication** — the API is public; any caller can query any Ethereum address.
+- **Single Alchemy key** — all requests share one API key; heavy load may hit rate limits.
+- **No pagination** on `/history` — returns a hard-capped 20 records; large wallets are not fully supported.
+- **Deployer key in env** — `DEPLOYER_PRIVATE_KEY` is used only for Hardhat scripts. It should never be set in production deployments.
+- **Sepolia testnet** — the NFT contract runs on Sepolia (test ETH only, no real value).
 
 ---
 
