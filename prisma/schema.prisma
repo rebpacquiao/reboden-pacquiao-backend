@@ -1,0 +1,19 @@
+// Prisma schema — MongoDB Atlas datasource
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model AccountBalance {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  address     String
+  balance     String
+  blockNumber Int
+  fetchedAt   DateTime @default(now())
+
+  @@index([address])
+}

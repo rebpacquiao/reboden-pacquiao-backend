@@ -1,0 +1,28 @@
+{
+  "name": "crypto-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push"
+  },
+  "dependencies": {
+    "@prisma/client": "^5",
+    "cors": "^2",
+    "dotenv": "^16",
+    "express": "^4",
+    "ioredis": "^5",
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2",
+    "@types/express": "^4",
+    "@types/node": "^20",
+    "prisma": "^5",
+    "ts-node-dev": "^2",
+    "typescript": "^5"
+  }
+}
